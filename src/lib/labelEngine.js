@@ -25,6 +25,16 @@ export const HARDWARE_ICONS = [
   { id: 'bolt', name: 'Bolt', url: '/icons/bolt.svg' },
   { id: 'nut', name: 'Nut', url: '/icons/nut.svg' },
   { id: 'washer', name: 'Washer', url: '/icons/washer.svg' },
+  { id: 'wing-nut', name: 'Wing Nut', url: '/icons/wing-nut.svg' },
+  { id: 'hex-key', name: 'Hex Key', url: '/icons/hex-key.svg' },
+  { id: 'wrench', name: 'Wrench', url: '/icons/wrench.svg' },
+  { id: 'socket', name: 'Socket', url: '/icons/socket.svg' },
+  { id: 'hammer', name: 'Hammer', url: '/icons/hammer.svg' },
+  { id: 'drill-bit', name: 'Drill Bit', url: '/icons/drill-bit.svg' },
+  { id: 'pliers', name: 'Pliers', url: '/icons/pliers.svg' },
+  { id: 'tape-measure', name: 'Tape Measure', url: '/icons/tape-measure.svg' },
+  { id: 'saw-blade', name: 'Saw Blade', url: '/icons/saw-blade.svg' },
+  { id: 'clamp', name: 'Clamp', url: '/icons/clamp.svg' },
 ]
 
 const font = new FontLoader().parse(helvetikerBold)

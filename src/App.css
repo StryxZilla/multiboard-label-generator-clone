@@ -42,6 +42,22 @@ label {
   font-size: 0.9rem;
 }
 
+.inline-toggle {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.advanced-box {
+  border: 1px solid #dbe3ec;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #f9fbfe;
+}
+
 input,
 select,
 button {

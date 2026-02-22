@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import {
   DEFAULT_PRESET_ID,
@@ -31,6 +31,7 @@ export default function App() {
   const [customHeightMm, setCustomHeightMm] = useState(15)
   const [paddingMm, setPaddingMm] = useState(2)
   const [iconSizeMm, setIconSizeMm] = useState(6.5)
+  const [iconSvgText, setIconSvgText] = useState('')
   const [status, setStatus] = useState('')
 
   const preset = useMemo(() => resolvePreset(presetId), [presetId])
@@ -58,19 +59,37 @@ export default function App() {
   )
 
   const svgMarkup = useMemo(
-    () => createSvgMarkup({ text, widthMm, heightMm, iconHref, layout }),
-    [text, widthMm, heightMm, iconHref, layout],
+    () => createSvgMarkup({ text, widthMm, heightMm, iconHref, iconSvgText, layout }),
+    [text, widthMm, heightMm, iconHref, iconSvgText, layout],
   )
 
   const previewUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgMarkup)}`
 
-  async function resolveIconSvgText() {
-    if (!iconHref || !iconHref.toLowerCase().endsWith('.svg')) return ''
-    const base = `${window.location.origin}${import.meta.env.BASE_URL}`
-    const url = new URL(iconHref.replace(/^\//, ''), base).toString()
-    const response = await fetch(url)
-    return await response.text()
-  }
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadIcon() {
+      if (!iconHref || !iconHref.toLowerCase().endsWith('.svg')) {
+        setIconSvgText('')
+        return
+      }
+
+      try {
+        const base = `${window.location.origin}${import.meta.env.BASE_URL}`
+        const url = new URL(iconHref.replace(/^\//, ''), base).toString()
+        const response = await fetch(url)
+        const svgText = await response.text()
+        if (!cancelled) setIconSvgText(svgText)
+      } catch {
+        if (!cancelled) setIconSvgText('')
+      }
+    }
+
+    loadIcon()
+    return () => {
+      cancelled = true
+    }
+  }, [iconHref])
 
   const exportSvg = () => {
     download('multiboard-label', new Blob([svgMarkup], { type: 'image/svg+xml' }), 'svg')
@@ -105,7 +124,6 @@ export default function App() {
     setStatus('Generating STL...')
 
     try {
-      const iconSvgText = await resolveIconSvgText()
       const mesh = createLabelMesh({
         text,
         widthMm,

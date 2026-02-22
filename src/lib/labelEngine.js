@@ -107,20 +107,41 @@ export function computeLayout({ widthMm, heightMm, withIcon, iconPosition = 'lef
   }
 }
 
-export function createSvgMarkup({ text, widthMm, heightMm, iconHref, layout }) {
+function createInlineIconMarkup(iconSvgText, layout) {
+  if (!iconSvgText?.trim()) return ''
+
+  const viewBoxMatch = iconSvgText.match(/viewBox\s*=\s*['\"]([^'\"]+)['\"]/i)
+  const viewBox = viewBoxMatch?.[1]?.trim() ?? '0 0 100 100'
+  const [minX = 0, minY = 0, vbWidth = 100, vbHeight = 100] = viewBox
+    .split(/\s+/)
+    .map((v) => Number(v))
+
+  const innerMatch = iconSvgText.match(/<svg[^>]*>([\s\S]*?)<\/svg>/i)
+  const inner = innerMatch?.[1]?.trim()
+  if (!inner) return ''
+
+  const safeWidth = Math.max(0.001, vbWidth)
+  const safeHeight = Math.max(0.001, vbHeight)
+  const scale = Math.min(layout.iconSizeMm / safeWidth, layout.iconSizeMm / safeHeight)
+  const renderW = safeWidth * scale
+  const renderH = safeHeight * scale
+  const offsetX = layout.iconX + (layout.iconSizeMm - renderW) / 2
+  const offsetY = layout.iconY + (layout.iconSizeMm - renderH) / 2
+
+  return `<g transform="translate(${offsetX} ${offsetY}) scale(${scale}) translate(${-minX} ${-minY})">${inner}</g>`
+}
+
+export function createSvgMarkup({ text, widthMm, heightMm, iconHref, iconSvgText = '', layout }) {
   const pxScale = 12
   const widthPx = Math.round(widthMm * pxScale)
   const heightPx = Math.round(heightMm * pxScale)
   const fontSizePx = Math.max(10, Math.min(56, Math.round(layout.textHeightMm * pxScale * 0.68)))
+  const iconMarkup = iconSvgText ? createInlineIconMarkup(iconSvgText, layout) : iconHref ? `<image href="${iconHref}" x="${layout.iconX}" y="${layout.iconY}" width="${layout.iconSizeMm}" height="${layout.iconSizeMm}" preserveAspectRatio="xMidYMid meet" />` : ''
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${widthPx}" height="${heightPx}" viewBox="0 0 ${widthMm} ${heightMm}">
   <rect x="0" y="0" width="${widthMm}" height="${heightMm}" rx="1.2" ry="1.2" fill="white" stroke="#111" stroke-width="0.4" />
-  ${
-    iconHref
-      ? `<image href="${iconHref}" x="${layout.iconX}" y="${layout.iconY}" width="${layout.iconSizeMm}" height="${layout.iconSizeMm}" preserveAspectRatio="xMidYMid meet" />`
-      : ''
-  }
+  ${iconMarkup}
   <text x="${layout.textX + layout.textWidthMm / 2}" y="${layout.textY + layout.textHeightMm / 2}" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="${fontSizePx / pxScale}" fill="#111">${(text || '').replace(/[<&>]/g, '')}</text>
 </svg>`
 }

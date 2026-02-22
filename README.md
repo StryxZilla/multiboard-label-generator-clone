@@ -40,6 +40,14 @@ npm run build
 npm run preview
 ```
 
+## Deploy (GitHub Pages)
+
+This project is configured for GitHub Pages deployment via GitHub Actions.
+
+- Expected live URL: https://stryxzilla.github.io/multiboard-label-generator-clone/
+- Vite base path is set to `/multiboard-label-generator-clone/` in `vite.config.js`
+
+
 ## Manual verification checklist
 
 Verified on local machine:
